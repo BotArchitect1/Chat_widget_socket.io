@@ -54,6 +54,9 @@
             app.emit("get_rooms")
        })
 
+       app.on("disconnect", "#disconnect")
+
+
        app.on("rooms", "#selectroom", (data) => {
            app.store.rooms = data
        })
