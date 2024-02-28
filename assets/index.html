@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Chat demo</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/assets/lariska.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/style.css" />
+
+    <script>
+    var store = {
+      messages: [],
+      rooms: ["lobby", "general", "random"],
+      error: null,
+      message: ""
+    };
+
+    app_pages = {
+        selectroom:  {},
+        createroom: {},
+        chat: {}
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        app = new Lariska({
+          store: store,
+          container: "#app",
+          pages: app_pages,
+          url: 'http://127.0.0.1:8000/'
+        });
+
+        app.addHandler("join", ()=> {
+           user_room = document.getElementById("user_room").value
+           user_name = document.getElementById("user_name").value
+           app.emit("join", {name: user_name, room: user_room})
+        })
+
+       app.addHandler("send", ()=> {
+            user_input = document.getElementById("user_message")
+            user_message = user_input.value
+            user_input.value = ""
+            app.emit("send", {text: user_message})
+       })
+
+       app.addHandler("back", ()=> {
+            app.emit("leave")
+            app.go("selectroom")
+       })
+
+       app.on("connect", null, ()=> {
+            app.emit("get_rooms")
+       })
+
+
+       app.on("rooms", "#selectroom", (data) => {
+           app.store.rooms = data
+       })
+
+        app.on("move", "#chat", (data) => {
+           app.store.room = data.room
+        })
+
+        app.on("message", "#messages", (data) => {
+            app.store.messages.push(data)
+        }, ".chat-messages")
+
+
+    })
+    </script>
+</head>
+<body>
+
+    <main>
+        <div class="container">
+            <section class="screen active card" id="app">
+                Загружаем
+            </section>
+        </div>
+    </main>
+
+<template id="selectroom">
+    <h1>Чат поддержки</h1>
+    <p>Выберите комнату</p>
+    <select class="alert alert-info block" id="user_room">
+        {{#each rooms}}
+            <option value="{{this}}">{{this}}</option>
+        {{/each}}
+    </select>
+    <p>Выберите имя</p>
+    <input type="text" class="alert alert-info block mb" id="user_name" placeholder="Например, Алиса"/>
+    <button class="tappable block" onclick="app.run('join')">Присоединиться</button>
+</template>
+
+<template id="chat">
+    <span class="back-link" onclick="app.run('back')">назад</span>
+    <h2>Комната: {{room}}</h2>
+
+    <div class="chat-messages">
+        {{#each messages}}
+            <p>{{this.name}}: {{this.text}}</p>
+        {{/each}}
+    </div>
+
+    <div class="message-form row">
+        <input class="alert info grow" type="text" id="user_message" placeholder="Введите сообщение">
+        <button class="form-button" onclick="app.run('send')"> Отправить </button>
+    </div>
+</template>
+
+<template id="messages" class="subtemplate">
+     <div class="chat-messages">
+        {{#each messages}}
+            <p>{{this.name}}: {{this.text}}</p>
+        {{/each}}
+     </div>
+</template>
+
+<template id="disconnect">
+
+    <h1>Соединение с сервером потеряно, приложение пытается восстановить связь</h1>
+
+</template>
+
+</body>
+</html>
