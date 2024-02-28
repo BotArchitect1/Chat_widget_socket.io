@@ -1,6 +1,8 @@
 # A website chat widget project using Fast API, socket.io. 
 ## You will need lariska.js microframework (already in the assets). 
-
+<div id="header">
+  <img src="https://github.com/BotArchitect1/Chat_widget_socket.io/blob/master/img/sample.png"/>
+</div>
 
 ### Installation
 1. Install Python 3.x if it is not installed. [Python.org](https://www.python.org/downloads/)
