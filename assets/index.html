@@ -54,6 +54,9 @@
             app.emit("get_rooms")
        })
 
+       app.on("disconnect", "#disconnect")
+
+
        app.on("rooms", "#selectroom", (data) => {
            app.store.rooms = data
        })
@@ -65,6 +68,8 @@
         app.on("message", "#messages", (data) => {
             app.store.messages.push(data)
         }, ".chat-messages")
+
+        app.go("selectroom");
 
     })
     </script>
